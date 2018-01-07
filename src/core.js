@@ -45,7 +45,7 @@ router.put('/sellbtc', (req, res) => {
     reset();
     console.log('/sellbtc');
     if (!req.body) return res.sendStatus(400)
-    sellBitcoinValue = req.body.amount;
+    sellBitcoinValue = parseFloat(req.body.amount);
     console.log('BTC:', sellBitcoinValue);
     sellBitcoin = true;
     res.send();
