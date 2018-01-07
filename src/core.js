@@ -4,7 +4,9 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
-let BTCBalance = 1;
+let BTCBalance = 23.45;
+let ETHBalance = 104.09;
+
 
 // configure app to use bodyParser()
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,8 +26,11 @@ var cardAuthenticated = false;
 var imageAuthenticated = false;
 var fingerprintAuthenticated = false;
 
-var buyBitcoin = false;
-var buyBitcoinValue = 0;
+var sellBitcoin = false;
+var sellBitcoinValue = 0;
+
+var buyETH = false;
+var buyETHValue = 0;
 
 router.get('/getWallet', (req, res) => {
     // reset();
@@ -40,30 +45,40 @@ router.put('/sellbtc', (req, res) => {
     reset();
     console.log('/sellbtc');
     if (!req.body) return res.sendStatus(400)
-    buyBitcoinValue = req.body.amount;
-    console.log('BTC:', buyBitcoinValue);
-    buyBitcoin = true;
+    sellBitcoinValue = req.body.amount;
+    console.log('BTC:', sellBitcoinValue);
+    sellBitcoin = true;
+    res.send();
+});
+
+router.put('/buyeth', (req, res) => {
+    reset();
+    console.log('/buyeth');
+    if (!req.body) return res.sendStatus(400)
+    buyETHValue = req.body.amount;
+    console.log('ETH:', buyETHValue);
+    buyETH = true;
     res.send();
 });
 
 router.put('/cardscan', (req, res) => {
     console.log('/cardScan');
     cardAuthenticated = true;
-    trySellBTC();
+    tryTransaction();
     res.send();
 });
 
 router.put('/fingerprint', (req, res) => {
     console.log('/fingerprint');
     fingerprintAuthenticated = true;
-    trySellBTC();
+    tryTransaction();
     res.send();
 });
 
 router.put('/image', (req, res) => {
     console.log('/image');
     imageAuthenticated = true;
-    trySellBTC();
+    tryTransaction();
     res.send();
 });
 
@@ -77,16 +92,23 @@ app.listen(PORT, () => {
     console.log('Server running on port ' + PORT);
 });
 
-function trySellBTC() {
-    if (!buyBitcoin) return;
+function tryTransaction() {
     if (!cardAuthenticated) return;
     if (!imageAuthenticated) return;
     if (!fingerprintAuthenticated) return;
     // Good to go
-    console.log('Bitcoin sold')
-    BTCBalance -= buyBitcoinValue;
-    if(BTCBalance < 0) BTCBalance = 0;
-    reset();
+    if (!sellBitcoin) {
+        console.log('Bitcoin sold')
+        BTCBalance -= sellBitcoinValue;
+        if (BTCBalance < 0) BTCBalance = 0;
+        reset();
+    }
+    if (!buyETH) {
+        console.log('ETH buy')
+        ETHBalance += buyETHValue;
+        if (ETHBalance < 0) ETHBalance = 0;
+        reset();
+    }
 }
 
 function reset() {
@@ -94,6 +116,8 @@ function reset() {
     cardAuthenticated = false;
     imageAuthenticated = false;
     fingerprintAuthenticated = false;
-    buyBitcoinValue = 0;
-    buyBitcoin = false;
+    sellBitcoinValue = 0;
+    sellBitcoin = false;
+    buyETH = false;
+    buyETHValue = 0;
 }
